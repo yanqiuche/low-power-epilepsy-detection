@@ -5,6 +5,9 @@ Project which uses epilepsy data to create a ANN which detects seizures and port
 
 ## Current status
 
+Side Note: 28-04-2020
+- Great overview: https://arxiv.org/pdf/2002.01925.pdf 
+
 Update: 12-04-2020
 - Saw a talk by Jerald Yoo today. He thinks DNN (Deep Neural Networks) is not the right ML-approach. Uses mostly SVM-classification. Interesting point he made is that he said it is extremely hard to detect 
 - I sorted models, it's better know I feel

@@ -5,20 +5,21 @@ import torch.optim as optim
 import torch.nn as nn
 from pathlib import Path
 from torch.utils.data import DataLoader
-from src.models.epilepsy_data_loader import EpilepsyData
-from src.models.single_layer import SingleLayerNN
-from src.models.cnn_model import convmodel
-from src.models.learn_rate import find_lr
-from src.models.train import train
-from src.visualization.visualize import visualize_train_results
+from epilepsy_data_loader import EpilepsyData
+from single_layer import SingleLayerNN
+from double_layer import DoubleLayer
+from cnn_model import convmodel
+from learn_rate import find_lr
+from train import train
+from visualize import visualize_train_results
 import random
 
 window_size = 1024
 sample_spacing = 256
 bs = 200
-lr = 0.01 #0.0005  # 67% lr = 0.00075 # 64%
+lr = 0.0005  #0.0005  # 67% lr = 0.00075 # 64%
 epochs = 20
-train_ratio = 1
+train_ratio = 0.8
 save = False
 EEG_DATA = "/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/"
 
@@ -30,17 +31,17 @@ all_files = random.sample(all_files, len(all_files))
 train_data = EpilepsyData(all_files[:round(train_ratio*len(all_files))], window_size)
 valid_data = EpilepsyData(all_files[round(train_ratio*len(all_files)):], window_size)
 train_loader = DataLoader(train_data, batch_size=bs, shuffle=True)
-# valid_data = DataLoader(valid_data, batch_size=bs, shuffle=True)
+valid_data = DataLoader(valid_data, batch_size=bs, shuffle=True)
 
-# epilepsy_model_1 = convmodel(window_size, 1).double()
-# optimizer_1 = optim.SGD(epilepsy_model_1.parameters(), lr=lr, momentum=0.9)
+epilepsy_model_1 = DoubleLayer(window_size, 1).double()
+optimizer_1 = optim.SGD(epilepsy_model_1.parameters(), lr=lr, momentum=0.9)
 
-epilepsy_model_2 = SingleLayerNN(23*window_size, 1).double()
-optimizer_2 = optim.SGD(epilepsy_model_2.parameters(), lr=lr, momentum=0.9)
+# epilepsy_model_2 = SingleLayerNN(23*window_size, 1).double()
+# optimizer_2 = optim.SGD(epilepsy_model_2.parameters(), lr=lr, momentum=0.9)
 criterion = nn.BCELoss()
 # results = train(train_loader, valid_data, epochs, optimizer_2, epilepsy_model_2)
-results = train(epilepsy_model_2, train_loader, epochs, criterion, optimizer_2)
+valid, results = train(epilepsy_model_1, train_loader, valid_data, epochs, criterion, optimizer_1)
 
-visualize_train_results(results)
+visualize_train_results(valid, results)
 
 # torch.save(epilepsy_model_1.state_dict(), "./models/model_2.pth")

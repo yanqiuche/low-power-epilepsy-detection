@@ -2,10 +2,11 @@ import torch
 import pandas as pd
 
 
-def train(net, train_loader, epochs, criterion, optimizer, print_every=1):
+def train(net, train_loader, valid_loader, epochs, criterion, optimizer, print_every=1):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net.train()
     columns = ["epoch", "iteration", "size", "loss", "fn", "fp", "tn", "tp"]
+    valid_result = []
     results = []
     for epoch in range(epochs):
         for i, batch in enumerate(train_loader):
@@ -20,8 +21,16 @@ def train(net, train_loader, epochs, criterion, optimizer, print_every=1):
             fn, fp, tn, tp = profile_results(torch.round(outputs), labels)
             results.append([epoch + 1, i + 1, len(seizures), running_loss, fn, fp, tn, tp])
             print_last_results(epoch + 1, i + 1, running_loss, fn, fp, tn, tp) if (i + 1) % print_every == 0 else False
-    net.eval()
-    return pd.DataFrame(results, columns=columns)
+        net.eval()
+
+        for i, batch in enumerate(valid_loader):
+            seizures, labels, filenames = batch[0].to(device), batch[1].to(device), batch[2]
+            outputs = net(seizures)
+            fn, fp, tn, tp = profile_results(torch.round(outputs), labels)
+            print(((tn+tp)/(fn+fp+tn+tp)))
+            valid_result.append((tn+tp)/(fn+fp+tn+tp))
+
+    return valid_result, pd.DataFrame(results, columns=columns)
 
 
 def print_last_results(epoch, iter, loss, fn, fp, tn, tp):
