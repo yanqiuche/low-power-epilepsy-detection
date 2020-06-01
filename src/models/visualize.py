@@ -64,4 +64,4 @@ def profile_per_file():
     pass
 
 
-data_length("/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/")
+# data_length("/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/")

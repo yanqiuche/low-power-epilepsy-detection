@@ -16,9 +16,9 @@ import random
 
 window_size = 1024
 sample_spacing = 256
-bs = 200
+bs = 400
 lr = 0.0005  #0.0005  # 67% lr = 0.00075 # 64%
-epochs = 20
+epochs = 10
 train_ratio = 0.8
 save = False
 EEG_DATA = "/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/"
@@ -43,5 +43,8 @@ criterion = nn.BCELoss()
 valid, results = train(epilepsy_model_1, train_loader, valid_data, epochs, criterion, optimizer_1)
 
 visualize_train_results(valid, results)
+
+module = epilepsy_model_1
+print(list(module.named_parameters()))
 
 # torch.save(epilepsy_model_1.state_dict(), "./models/model_2.pth")

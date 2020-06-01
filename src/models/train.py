@@ -14,7 +14,7 @@ def train(net, train_loader, valid_loader, epochs, criterion, optimizer, print_e
             seizures, labels, filenames = batch[0].to(device), batch[1].to(device), batch[2]
             optimizer.zero_grad()
             outputs = net(seizures)
-            loss = criterion(outputs.view(-1), labels.double())
+            loss = criterion(outputs, labels.double())
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
@@ -55,6 +55,7 @@ def profile_results(outputs, targets):
         elif output and not target:
             fp = fp + 1
 
+    # print(str(fn) + " " + str(fp) + " " + str(tn) + " " + str(tp))
     return fn, fp, tn, tp
 
 
