@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-
 class convmodel(nn.Module):
     def __init__(self, window_size, out_classes, drop=0.5, d_linear=124):
         super().__init__()
@@ -29,4 +28,17 @@ class convmodel(nn.Module):
         # print(x.size())
         output = self.dense(x)
 
-        return torch.sigmoid(output)
+        return output
+
+
+class twod_convmodel(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.conv1 = nn.Conv2d(23, 66, kernel_size=[3, 3])
+
+    def forward(self, x):
+        output = x.conv1
+        print(output.size)
+
+        return output

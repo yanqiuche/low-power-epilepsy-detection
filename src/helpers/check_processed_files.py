@@ -1,11 +1,12 @@
-from pathlib import Path
-import mne
 import os
 from pyedflib import highlevel
-import pandas as pd
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn import svm
+from scipy import signal
+from src.helpers.correlations import cross_correlation, pearson_correlation, time_lagged_cross_correlation, window_time_lagged_cross_correlation
+from pathlib import Path
+from sklearn import preprocessing
 
 
 def import_files(folders=None, root=None):
@@ -36,7 +37,6 @@ def detect_energy_spikes():
     seiz_23_2 = [[30, 50], [53, 59]]
     seiz_23_3 = [2, 90]
 
-
     y_axis = np.resize([750, 0], len(recorded_seizures))
 
     z = np.array(signals[2])
@@ -55,19 +55,85 @@ def detect_energy_spikes():
     plt.show()
 
 
-def create_support_vector_machines():
-    window_length = 1024
-    all_files = import_files()
+def frequency_time_image():
+    path = "/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/seizures/chb06_04_UY-seizure.edf"
+    signal_norm, signal_header, _ = highlevel.read_edf(path)
+    length = 30
 
-    # signals_1, signal_headers, header = highlevel.read_edf(str(all_files[0][0]))
-    signals_2, signal_headers, header = highlevel.read_edf(str(all_files[180][0]))
-    montage = mne.channels.make_standard_montage("standard_1020")
+    print(signal_header)
+    f, t, Zxx = signal.stft(signal_norm[2], nperseg=8, fs=256)
 
-    # print(array(signals_1).shape)
-    # signals_2 = np.array(signals_2)
+    print(np.abs(Zxx).tostring)
 
-    # clf = svm.SVC(kernel="linear")
-    # clf.fit(signals_1[:, :window_length] + signals_2[:, :window_length], [0, 1])
+    plt.pcolormesh(t, f, np.abs(Zxx))
+    plt.title('STFT Magnitude')
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [s]')
+    plt.show()
 
 
-detect_energy_spikes()
+def normalize_data(data):
+    min_max_scaler = preprocessing.MinMaxScaler()
+    scaled = min_max_scaler.fit_transform(data)
+
+    # result = (data - np.min(data) / (np.max(data) - np.min(data)))
+    return scaled
+
+    select_patients = [1, 22]
+
+    path = "/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/"
+
+    indexed_seizures = [([str(i), str(i).split("/")[-1].split("_")[-3], str(i).split("/")[-1].split("_")[-2]]) for i in sorted(Path(path).glob('seizures/*.edf'))]
+    indexed_normal = [([str(i), str(i).split("/")[-1].split("_")[-3], str(i).split("/")[-1].split("_")[-2]]) for i in sorted(Path(path).glob('normal/*.edf'))]
+
+    # fft_per_second(indexed_seizures[30])
+    # y_corr, x_corr = pearson_correlation(indexed_normal, indexed_seizures)
+    # time_lagged_cross_correlation(indexed_seizures[10], x_corr, y_corr)
+    # cross_correlation(x_corr, y_corr, indexed_seizures[10])
+
+    plt.show()
+
+def fft_per_second(data):
+    signal_, _, _ = highlevel.read_edf(data[0])
+    hz = 256
+    end_time = 2
+
+    # fft = np.fft.fft(signal_[1, 0:hz*end_time], norm="ortho")
+    # fftfreq = np.fft.fftfreq(len(signal_[1, :hz*end_time]))
+
+    f, t, Zxx = signal.stft(signal_[18][:256*5], nperseg=64, fs=256)
+    print((signal_)[:, 0:256*5].shape)
+    f_, t_, Zxx_ = signal.stft(signal_[:, :256*5], nperseg=64, fs=256)
+    print(Zxx.shape)
+    print(Zxx_.shape)
+
+    plt.figure()
+    plt.pcolor(t, f, normalize_data(np.abs(Zxx)), cmap="RdBu")
+    plt.colorbar()
+    # plt.grid()
+
+    plt.figure()
+    plt.pcolor(t_, f_, normalize_data(np.abs(Zxx_[18])), cmap="RdBu")
+    # plt.semilogy(fftfreq[:256]*256, np.abs(fft[:256]))
+    # plt.grid()
+    plt.show()
+
+
+def main_thing():
+    select_patients = [1, 22]
+
+    path = "/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/"
+
+    indexed_seizures = [([str(i), str(i).split("/")[-1].split("_")[-3], str(i).split("/")[-1].split("_")[-2]]) for i in sorted(Path(path).glob('seizures/*.edf'))]
+    indexed_normal = [([str(i), str(i).split("/")[-1].split("_")[-3], str(i).split("/")[-1].split("_")[-2]]) for i in sorted(Path(path).glob('normal/*.edf'))]
+
+    # fft_per_second(indexed_seizures[30])
+    y_corr, x_corr = pearson_correlation(indexed_normal, indexed_seizures)
+    # time_lagged_cross_correlation(indexed_seizures[10], x_corr, y_corr)
+    # cross_correlation(x_corr, y_corr, indexed_seizures[10])
+    # window_time_lagged_cross_correlation(x_corr, y_corr)
+
+    plt.show()
+
+
+main_thing()

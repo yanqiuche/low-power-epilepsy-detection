@@ -1,5 +1,4 @@
 import torch.nn as nn
-import torch.nn.functional as F
 import torch
 
 # class DoubleLayer(nn.Module):
@@ -23,15 +22,15 @@ import torch
 
 
 class DoubleLayer(nn.Module):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, window_size, channels):
         super().__init__()
-        self.linears = nn.ModuleList([nn.Linear(input_size, 1, bias=True) for i in range(23)])
-        self.linear_2 = nn.Linear(23, 1, bias=True)
+        self.linears = nn.ModuleList([nn.Linear(input_size, 1, bias=True) for i in range(channels)])
+        self.linear_2 = nn.Linear(channels, 1, bias=True)
 
         # self.relu = nn.ReLU()
         self.dropout = nn.Dropout(p=0.1)
-        self.batchnorm1 = nn.ModuleList([nn.BatchNorm1d(1024) for i in range(23)])
-        self.batchnorm2 = nn.BatchNorm1d(23)
+        self.batchnorm1 = nn.ModuleList([nn.BatchNorm1d(window_size) for i in range(channels)])
+        self.batchnorm2 = nn.BatchNorm1d(channels)
         # self.batchnorm2 = nn.BatchNorm1d(64)
 
     def forward(self, x):

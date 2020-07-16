@@ -6,15 +6,15 @@ def train(net, train_loader, valid_loader, epochs, criterion, optimizer, writer)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     net.train()
-
     for epoch in range(epochs):
         running_outputs, running_labels = [], []
         running_loss = 0
         epoch_time = time.time()
         for i, batch in enumerate(train_loader):
             time_to_read_batch = time.time() - epoch_time
-            print("Read time: " + str(time_to_read_batch))
+            # print("Read time: " + str(time_to_read_batch))
             batch_time = time.time()
+            print(batch[0])
             seizures, labels = batch[0].to(device), batch[1].to(device)
             optimizer.zero_grad()
             outputs = net(seizures)
@@ -24,7 +24,7 @@ def train(net, train_loader, valid_loader, epochs, criterion, optimizer, writer)
             running_loss += loss.item()
             running_outputs += torch.round(torch.sigmoid(outputs))
             running_labels += labels
-            print("Train time: " + str(time.time()-batch_time))
+            # print("Train time: " + str(time.time()-batch_time))
             epoch_time = time.time()
         net.eval()
 
@@ -86,6 +86,7 @@ def profile_results(outputs, targets, epoch, name, writer=None, loss=None):
 
 
 def profile_to_measure(tn, tp, fp, fn):
+    # print(str(tn) + " " + str(tp) + " " + str(fp) + " " + str(fn) + " ")
     correctness = (tn + tp) / (tp + tn + fp + fn)
     try:
         sensitivity = tp/(tp+fn)
