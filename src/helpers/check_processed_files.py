@@ -7,7 +7,12 @@ from scipy import signal
 from src.helpers.correlations import cross_correlation, pearson_correlation, time_lagged_cross_correlation, window_time_lagged_cross_correlation
 from pathlib import Path
 from sklearn import preprocessing
-
+import mne
+from mne import read_proj
+from mne.io import read_raw_edf
+from time import time
+from mne.preprocessing import ICA
+from mne.datasets import sample
 
 def import_files(folders=None, root=None):
     data = []
@@ -103,7 +108,7 @@ def fft_per_second(data):
 
     f, t, Zxx = signal.stft(signal_[18][:256*5], nperseg=64, fs=256)
     print((signal_)[:, 0:256*5].shape)
-    f_, t_, Zxx_ = signal.stft(signal_[:, :256*5], nperseg=64, fs=256)
+    f_, t_, Zxx_ = signal.stft(siguitargnal_[:, :256*5], nperseg=64, fs=256)
     print(Zxx.shape)
     print(Zxx_.shape)
 
@@ -118,17 +123,41 @@ def fft_per_second(data):
     # plt.grid()
     plt.show()
 
+def run_ica(method, picks, reject, raw, fit_params=None):
+    ica = ICA(n_components=20, method=method, fit_params=fit_params,
+              random_state=0)
+    t0 = time()
+    print(raw)
+    ica.fit(raw, picks=picks, reject=reject)
+    fit_time = time() - t0
+    title = ('ICA decomposition using %s (took %.1fs)' % (method, fit_time))
+    ica.plot_components(title=title)
+
+
+def projection_on_head(file):
+    print(file[0])
+    raw = read_raw_edf(file[0], preload=True)
+    raw.pick_types(eeg=True, stim=True)
+
+    picks = mne.pick_types(raw.info)
+    print("Print picks: ")
+    print(picks)
+    reject = dict(mag=5e-12, grad=4000e-13)
+    raw.filter(1, 30, fir_design='firwin')
+    run_ica('fastica', picks, reject, raw)
+
+
 
 def main_thing():
     select_patients = [1, 22]
-
     path = "/home/jmsvanrijn/Documents/Afstuderen/Code/low-power-epilepsy-detection/data/processed/"
 
     indexed_seizures = [([str(i), str(i).split("/")[-1].split("_")[-3], str(i).split("/")[-1].split("_")[-2]]) for i in sorted(Path(path).glob('seizures/*.edf'))]
     indexed_normal = [([str(i), str(i).split("/")[-1].split("_")[-3], str(i).split("/")[-1].split("_")[-2]]) for i in sorted(Path(path).glob('normal/*.edf'))]
 
+    projection_on_head(indexed_seizures[30])
     # fft_per_second(indexed_seizures[30])
-    y_corr, x_corr = pearson_correlation(indexed_normal, indexed_seizures)
+    # y_corr, x_corr = pearson_correlation(indexed_normal, indexed_seizures)
     # time_lagged_cross_correlation(indexed_seizures[10], x_corr, y_corr)
     # cross_correlation(x_corr, y_corr, indexed_seizures[10])
     # window_time_lagged_cross_correlation(x_corr, y_corr)

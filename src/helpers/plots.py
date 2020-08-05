@@ -42,7 +42,7 @@ axWindow = plt.axes([0.15, 0.1, 0.65, 0.03])
 axTime = plt.axes([0.15, 0.15, 0.65, 0.03])
 
 windowSlider = Slider(axWindow, 'Window', 1, 20, valinit=5, valstep=1)
-timeSlider = Slider(axTime, 'Time', 1, 20, valinit=0, valstep=1)
+timeSlider = Slider(axTime, 'Time', 0, 30, valinit=0, valstep=1)
 
 windowSlider.on_changed(update)
 timeSlider.on_changed(update)
