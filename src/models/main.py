@@ -5,16 +5,15 @@
 import torch.optim as optim
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
-from src.models.double_layer import DoubleLayer
 from src.models.train import train
 from src.models.load_data import load_data
-from src.models.cnn_model import convmodel, twod_convmodel
+from src.models.cnn_model import twod_convmodel
 
 window_size = 1024
 sample_spacing = 256
 channels = 23
 bs = 200
-lr = 0.005  #0.0005  # 67% lr = 0.00075 # 64%
+lr = 0.05 # 0.0005  # 67% lr = 0.00075 # 64%
 epochs = 50
 train_ratio = 0.8
 type = 3

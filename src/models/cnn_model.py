@@ -1,5 +1,5 @@
-import torch
 import torch.nn as nn
+
 
 class convmodel(nn.Module):
     def __init__(self, window_size, out_classes, drop=0.5, d_linear=124):
@@ -23,9 +23,7 @@ class convmodel(nn.Module):
     def forward(self, x):
         bs = x.size(0)
         x = self.conv(x)
-        # print(x.size())
         x = x.view(bs, -1)
-        # print(x.size())
         output = self.dense(x)
 
         return output
@@ -34,11 +32,20 @@ class convmodel(nn.Module):
 class twod_convmodel(nn.Module):
     def __init__(self):
         super().__init__()
-
-        self.conv1 = nn.Conv2d(23, 66, kernel_size=[3, 3])
+        self.linear1 = nn.Linear(23*23, 10*10, bias=True)
+        self.linear2 = nn.Linear(10*10, 1, bias=True)
+        self.linear3 = nn.Linear(5*5, 1, bias=True)
+        self.batch1 = nn.BatchNorm1d(23*23)
+        self.batch2 = nn.BatchNorm1d(10*10)
+        self.batch3 = nn.BatchNorm1d(5*5)
 
     def forward(self, x):
-        output = x.conv1
-        print(output.size)
-
-        return output
+        bs = x.size(0)
+        out = x.view(bs, -1)
+        out = self.batch1(out)
+        out = self.linear1(out)
+        out = self.batch2(out)
+        out = self.linear2(out)
+        # out = self.batch3(out)
+        # out = self.linear3(out)
+        return out

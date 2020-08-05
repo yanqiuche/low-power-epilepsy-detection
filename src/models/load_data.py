@@ -5,6 +5,9 @@ import random
 from torch.utils.data import DataLoader
 from src.models.epilepsy_data_loader import MultiplePerFileEpilepsyData, OnePerFileEpilepsyData, MultiplePerFileEpilepsyData2
 from src.models.complete_reading_loader import CompleteReading1D_CNN
+from src.models.helpers import load_correlations
+import numpy as np
+
 
 def load_data(path, window_size, bs, type, train_ratio):
     if type == 1:
@@ -16,7 +19,7 @@ def load_data(path, window_size, bs, type, train_ratio):
         train_data = MultiplePerFileEpilepsyData(all_files[:round(train_ratio * len(all_files))], window_size)
         valid_data = MultiplePerFileEpilepsyData(all_files[round(train_ratio * len(all_files)):], window_size)
     elif type == 3:
-        all_files = max_per_file_2(path, 256*5)
+        all_files = select_patients_for_cnn()
         train_data = CompleteReading1D_CNN(all_files[:round(train_ratio * len(all_files))])
         valid_data = CompleteReading1D_CNN(all_files[round(train_ratio * len(all_files)):])
     else:
@@ -53,6 +56,12 @@ def max_per_file(path, window_size):
     print(len(seizure_files + normal_files))
 
     return random.sample((seizure_files + normal_files), len((seizure_files+normal_files)))
+
+
+def select_patients_for_cnn():
+    patients = np.arange(1, 23)
+    normal_files, seizure_files = load_correlations(patients)
+    return random.sample((seizure_files + normal_files), len((seizure_files + normal_files)))
 
 
 def max_per_file_2(path, window_size):
