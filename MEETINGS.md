@@ -14,4 +14,20 @@ Approaches:
 
 ### 9-Juli
 
-1. List all things still needed to be done 
+1. List all things still needed to be done
+
+### 24-Juli
+1. Extracted features
+2. Subtract to features from each other
+3. Check if 50Hz 
+
+### 30-Juli
+1. Images + signals under singals
+2. Corr_matrix, window, channels
+
+
+### 4-August
+1. Add histograms of the data
+2. Show histograms of diffrente time frame B2B
+3. Search for networks which use statistical data as input
+4. Check if papers about correlation matrix with EC/ normal EEG 
