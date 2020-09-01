@@ -14,7 +14,6 @@ def train(net, train_loader, valid_loader, epochs, criterion, optimizer, writer)
             time_to_read_batch = time.time() - epoch_time
             # print("Read time: " + str(time_to_read_batch))
             batch_time = time.time()
-            print(batch[0])
             seizures, labels = batch[0].to(device), batch[1].to(device)
             optimizer.zero_grad()
             outputs = net(seizures)

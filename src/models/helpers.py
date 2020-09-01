@@ -38,7 +38,7 @@ def load_correlations(select_patients):
     return seizures, normal
 
 
-def calculate_window(data, window, time):
+def calculate_window(data, window, time, abs=1):
     frame = pd.DataFrame(np.zeros((23, int(window)*256)))
     i = 0
     for seizures in data:
@@ -50,12 +50,13 @@ def calculate_window(data, window, time):
         except:
             selected = seizures[0][:, t_start:t_end]
 
-
         if len(selected[1]) != t_end-t_start:
             i = i + 1
         else:
-            frame = frame.add(pd.DataFrame(np.abs(selected)))
-            # frame = frame.add(pd.DataFrame(selected))
+            if abs:
+                frame = frame.add(pd.DataFrame(np.abs(selected)))
+            else:
+                frame = frame.add(pd.DataFrame(selected))
 
     return frame.T.corr(), i
 
@@ -74,7 +75,6 @@ def calculated_patients():
         for t in range(0, time):
             nor_corr, nor_drop = calculate_window(seizures, w, t)
             seiz_corr, seiz_drop = calculate_window(normal, w, t)
-            # print(seiz_corr)
             seiz_corr.to_numpy()[np.diag_indices(23)] = 0
             print(pd.DataFrame(seiz_corr))
             print("Size seiz: " + str(round(seiz_corr.to_numpy().sum(), 2)) + " Size nor: " + str(round(
